@@ -18,17 +18,31 @@ install_github_cli() {
 
   case $(uname | tr '[:upper:]' '[:lower:]') in
     linux*)
-      local platform=linux_amd64
+      local platform=linux
       ;;
     darwin*)
-      local platform=macOS_amd64
+      local platform=macOS
       ;;
     *)
       local platform=notset
       ;;
   esac
 
-  local filename="gh_${version}_${platform}"
+  local architecture
+
+  case "$(uname -m)" in
+    x86_64) architecture="amd64" ;;
+    arm64) architecture="arm64" ;;
+    aarch64) architecture="arm64" ;;
+    *) fail "Unsupported architecture" ;;
+  esac
+
+  if [ "$platform" = "macOS" ]; then
+    # For now, github-cli for macOS is only provided for amd64
+    architecture="amd64"
+  fi
+
+  local filename="gh_${version}_${platform}_${architecture}"
   local download_url="$(get_download_url $filename)"
   local tmp_bin_path="${TMPDIR}/${filename}.tar.gz"
   local tmp_path="${TMPDIR}/${filename}"
